@@ -1,16 +1,16 @@
-# React + Vite
+# MEDISTOCK Frontend (Cliente SPA)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Este es el repositorio del cliente frontend construido con Vite y React para conectarse a la API de Medistock.
 
-Currently, two official plugins are available:
+## Arquitectura (Despliegue Separado)
+Esta aplicación está diseñada para ser desplegada en un servidor distinto al backend (ej. AWS S3 + CloudFront, Vercel, o un EC2 separado), cumpliendo con la necesidad de separación física de componentes y demostrando la integración HTTP.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Instalación y Uso Local
+1. `npm install`
+2. `npm run dev`
 
-## React Compiler
+## Configuración
+La aplicación se comunica por defecto con `http://localhost:8000/api/v1` (Backend).
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Repositorio Backend
+Asegúrate de clonar y levantar el servidor Backend en su propio entorno para que este cliente pueda funcionar.
