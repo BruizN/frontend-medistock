@@ -9,6 +9,7 @@ function App() {
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [exchangeRate, setExchangeRate] = useState(950);
 
   // Login form states
   const [email, setEmail] = useState('');
@@ -19,8 +20,21 @@ function App() {
   useEffect(() => {
     if (token) {
       fetchProducts();
+      fetchExchangeRate();
     }
   }, [token]);
+
+  const fetchExchangeRate = async () => {
+    try {
+      const res = await fetch(`${API_URL}/orders/exchange-rate`);
+      if (res.ok) {
+        const data = await res.json();
+        setExchangeRate(data.clp_rate);
+      }
+    } catch (err) {
+      console.error('Could not fetch exchange rate');
+    }
+  };
 
   const fetchProducts = async () => {
     try {
@@ -186,28 +200,37 @@ function App() {
 
   if (window.location.pathname === '/payment/callback') {
     const searchParams = new URLSearchParams(window.location.search);
-    const token_ws = searchParams.get('token_ws') || new URLSearchParams(window.location.hash.substring(1)).get('token_ws');
+    const status = searchParams.get('status');
+    const token_ws = searchParams.get('token');
     
-    // Sometimes Webpay does a POST back. If it's a POST, we'd need the backend to handle the redirect to frontend with query params.
-    // For this simple mock/sandbox, we'll assume the token is in URL or we just show a generic success if we can't parse it.
+    if (status === 'cancelled') {
+      return (
+        <div className="auth-container glass-panel" style={{ textAlign: 'center' }}>
+          <h2 style={{ color: 'var(--error)', marginBottom: '1rem' }}>Payment Cancelled</h2>
+          <p>You cancelled the transaction. No charges were made.</p>
+          <button onClick={() => window.location.href = '/'} style={{ marginTop: '2rem' }}>Return to Catalog</button>
+        </div>
+      );
+    }
     
     return (
       <div className="auth-container glass-panel" style={{ textAlign: 'center' }}>
         <h2 style={{ color: 'var(--success)', marginBottom: '1rem' }}>Payment Processed!</h2>
-        <p>Your transaction has been received. In a real environment, we would validate token: {token_ws || 'N/A'} here.</p>
+        <p>Your transaction was received (Status: {status}). In a real environment, we would validate token: {token_ws || 'N/A'} here.</p>
         <button onClick={() => window.location.href = '/'} style={{ marginTop: '2rem' }}>Return to Catalog</button>
       </div>
     );
   }
 
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const cartTotalUsd = (cartTotal / exchangeRate).toFixed(2);
 
   return (
     <div className="app-container">
       <header>
         <h1>MEDISTOCK</h1>
         <div>
-          <span style={{ marginRight: '1rem', fontWeight: 'bold' }}>Total: ${cartTotal.toLocaleString('es-CL')}</span>
+          <span style={{ marginRight: '1rem', fontWeight: 'bold' }}>Total: ${cartTotal.toLocaleString('es-CL')} <small>(~${cartTotalUsd} USD)</small></span>
           <button className="secondary" onClick={logout}>Sign Out</button>
         </div>
       </header>
