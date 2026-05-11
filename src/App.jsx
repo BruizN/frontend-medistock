@@ -162,6 +162,30 @@ function App() {
     }
   };
 
+  if (window.location.pathname === '/payment/callback') {
+    const searchParams = new URLSearchParams(window.location.search);
+    const status = searchParams.get('status');
+    const token_ws = searchParams.get('token');
+    
+    if (status === 'cancelled') {
+      return (
+        <div className="auth-container glass-panel" style={{ textAlign: 'center' }}>
+          <h2 style={{ color: 'var(--error)', marginBottom: '1rem' }}>Payment Cancelled</h2>
+          <p>You cancelled the transaction. No charges were made.</p>
+          <button onClick={() => window.location.href = '/'} style={{ marginTop: '2rem' }}>Return to Catalog</button>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="auth-container glass-panel" style={{ textAlign: 'center' }}>
+        <h2 style={{ color: 'var(--success)', marginBottom: '1rem' }}>Payment Processed!</h2>
+        <p>Your transaction was received (Status: {status}). In a real environment, we would validate token: {token_ws || 'N/A'} here.</p>
+        <button onClick={() => window.location.href = '/'} style={{ marginTop: '2rem' }}>Return to Catalog</button>
+      </div>
+    );
+  }
+
   if (!token) {
     return (
       <div className="auth-container glass-panel">
@@ -195,30 +219,6 @@ function App() {
             {isRegistering ? 'Already have an account? Sign In' : 'Need an account? Register'}
           </button>
         </div>
-      </div>
-    );
-  }
-
-  if (window.location.pathname === '/payment/callback') {
-    const searchParams = new URLSearchParams(window.location.search);
-    const status = searchParams.get('status');
-    const token_ws = searchParams.get('token');
-    
-    if (status === 'cancelled') {
-      return (
-        <div className="auth-container glass-panel" style={{ textAlign: 'center' }}>
-          <h2 style={{ color: 'var(--error)', marginBottom: '1rem' }}>Payment Cancelled</h2>
-          <p>You cancelled the transaction. No charges were made.</p>
-          <button onClick={() => window.location.href = '/'} style={{ marginTop: '2rem' }}>Return to Catalog</button>
-        </div>
-      );
-    }
-    
-    return (
-      <div className="auth-container glass-panel" style={{ textAlign: 'center' }}>
-        <h2 style={{ color: 'var(--success)', marginBottom: '1rem' }}>Payment Processed!</h2>
-        <p>Your transaction was received (Status: {status}). In a real environment, we would validate token: {token_ws || 'N/A'} here.</p>
-        <button onClick={() => window.location.href = '/'} style={{ marginTop: '2rem' }}>Return to Catalog</button>
       </div>
     );
   }
