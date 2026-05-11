@@ -177,6 +177,16 @@ function App() {
       );
     }
     
+    if (status === 'rejected') {
+      return (
+        <div className="auth-container glass-panel" style={{ textAlign: 'center' }}>
+          <h2 style={{ color: 'var(--error)', marginBottom: '1rem' }}>Payment Rejected</h2>
+          <p>Your transaction was rejected by the bank. Please try another card.</p>
+          <button onClick={() => window.location.href = '/'} style={{ marginTop: '2rem' }}>Return to Catalog</button>
+        </div>
+      );
+    }
+    
     return (
       <div className="auth-container glass-panel" style={{ textAlign: 'center' }}>
         <h2 style={{ color: 'var(--success)', marginBottom: '1rem' }}>Payment Processed!</h2>
