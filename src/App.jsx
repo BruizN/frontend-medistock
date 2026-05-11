@@ -14,6 +14,8 @@ function App() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  const [isRegistering, setIsRegistering] = useState(false);
+
   useEffect(() => {
     if (token) {
       fetchProducts();
@@ -36,32 +38,54 @@ function App() {
     }
   };
 
-  const login = async (e) => {
+  const handleAuth = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      const formData = new URLSearchParams();
-      formData.append('username', email);
-      formData.append('password', password);
-
-      const res = await fetch(`${API_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: formData
-      });
-      
-      if (res.ok) {
-        const data = await res.json();
-        setToken(data.access_token);
-        localStorage.setItem('token', data.access_token);
+      if (isRegistering) {
+        // Register flow
+        const res = await fetch(`${API_URL}/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, role: 'client' })
+        });
+        
+        if (res.ok) {
+          // Auto login after register
+          await login(email, password);
+        } else {
+          const data = await res.json();
+          setError(data.detail || 'Registration failed.');
+        }
       } else {
-        setError('Invalid credentials. Please register in the API first or use seed data.');
+        // Login flow
+        await login(email, password);
       }
     } catch (err) {
       setError('Error connecting to authentication service.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const login = async (loginEmail, loginPassword) => {
+    const formData = new URLSearchParams();
+    formData.append('username', loginEmail);
+    formData.append('password', loginPassword);
+
+    const res = await fetch(`${API_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: formData
+    });
+    
+    if (res.ok) {
+      const data = await res.json();
+      setToken(data.access_token);
+      localStorage.setItem('token', data.access_token);
+    } else {
+      setError('Invalid credentials.');
     }
   };
 
@@ -127,7 +151,7 @@ function App() {
       <div className="auth-container glass-panel">
         <h2 style={{ marginBottom: '1.5rem', color: 'var(--primary)' }}>MEDISTOCK Portal</h2>
         {error && <p style={{ color: 'var(--error)', marginBottom: '1rem' }}>{error}</p>}
-        <form onSubmit={login}>
+        <form onSubmit={handleAuth}>
           <input 
             type="email" 
             placeholder="Email (e.g. admin@medistock.com)" 
@@ -142,10 +166,19 @@ function App() {
             onChange={e => setPassword(e.target.value)} 
             required 
           />
-          <button type="submit" disabled={loading} style={{ width: '100%' }}>
-            {loading ? 'Authenticating...' : 'Sign In'}
+          <button type="submit" disabled={loading} style={{ width: '100%', marginBottom: '1rem' }}>
+            {loading ? 'Processing...' : (isRegistering ? 'Register' : 'Sign In')}
           </button>
         </form>
+        <div style={{ textAlign: 'center' }}>
+          <button 
+            className="secondary" 
+            onClick={() => { setIsRegistering(!isRegistering); setError(''); }} 
+            style={{ width: '100%' }}
+          >
+            {isRegistering ? 'Already have an account? Sign In' : 'Need an account? Register'}
+          </button>
+        </div>
       </div>
     );
   }
