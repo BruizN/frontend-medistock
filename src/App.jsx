@@ -93,6 +93,7 @@ function App() {
     setToken(null);
     localStorage.removeItem('token');
     setCart([]);
+    setError('');
   };
 
   const addToCart = (product) => {
